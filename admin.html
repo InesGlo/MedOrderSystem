@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - MedOrder Musanze</title>
+    
+    <!-- Bootstrap 5.3.0 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6.4.0 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #333;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #dc3545;
+            color: #1e3c72;
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            color: #333;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: #1e3c72;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 60, 114, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .table {
+            color: #333;
+        }
+
+        .table th {
+            border-bottom: 2px solid #1e3c72;
+            font-weight: 600;
+            color: #1e3c72;
+            background: rgba(30, 60, 114, 0.05);
+        }
+
+        .table td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #555;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.25);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .badge-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-inactive {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+        }
+
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .badge-confirmed {
+            background: rgba(23, 162, 184, 0.2);
+            color: #17a2b8;
+        }
+
+        .badge-processing {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .badge-shipped {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+        }
+
+        .badge-delivered {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .security-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .secure {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-pills me-2"></i>Admin Panel
+        </div>
+
+        <div class="admin-badge">
+            <i class="fas fa-shield-alt"></i>
+            System Administrator
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active" onclick="showSection('overview')">
+                    <i class="fas fa-home"></i>Overview
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('users')">
+                    <i class="fas fa-users"></i>User Management
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('medicines')">
+                    <i class="fas fa-pills"></i>Medicine Inventory
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-cart"></i>Order Management
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('prescriptions')">
+                    <i class="fas fa-file-medical"></i>Prescription Verification
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('pharmacies')">
+                    <i class="fas fa-store"></i>Pharmacy Management
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-line"></i>Analytics
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('audit')">
+                    <i class="fas fa-shield-alt"></i>Audit Logs
+                </a>
+            </li>
+            <li class="mt-4">
+                <a href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="admin-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Complete system management and monitoring</p>
+            </div>
+            <div class="d-flex gap-2">
+                <div class="security-indicator secure">
+                    <i class="fas fa-shield-alt"></i>
+                    System Secure
+                </div>
+                <button class="btn btn-primary" onclick="exportData()">
+                    <i class="fas fa-download me-2"></i>Export Data
+                </button>
+                <button class="btn btn-primary" onclick="refreshData()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview-section" class="admin-section">
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div>Total Users</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMedicines">0</div>
+                        <div>Medicines</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div>Total Orders</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPharmacies">0</div>
+                        <div>Pharmacies</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <h5>Order Trends</h5>
+                        <div class="chart-container">
+                            <canvas id="orderChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <h5>Medicine Categories</h5>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="content-card">
+                <h5>Recent Orders</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Medicine</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No recent orders</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users-section" class="admin-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>User Management</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" id="userSearch" placeholder="Search users..." style="width: 200px;">
+                        <button class="btn btn-primary" onclick="addNewUser()">
+                            <i class="fas fa-user-plus me-2"></i>Add User
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Security Level</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Last Login</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medicines Section -->
+        <div id="medicines-section" class="admin-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Medicine Inventory Overview</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" id="medicineSearch" placeholder="Search medicines..." style="width: 200px;">
+                        <span class="badge bg-info text-white">
+                            <i class="fas fa-eye me-2"></i>View Only
+                        </span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Availability</th>
+                                <th>Prescription</th>
+                                <th>Manufacturer</th>
+                                <th>Pharmacy</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicinesTable">
+                            <!-- Medicines will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders-section" class="admin-section hidden">
+            <div class="content-card">
+                <h5>Order Management</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Tracking #</th>
+                                <th>Customer</th>
+                                <th>Medicine</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Section -->
+        <div id="prescriptions-section" class="admin-section hidden">
+            <div class="content-card">
+                <h5>Prescription Verification</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Doctor License</th>
+                                <th>Date Issued</th>
+                                <th>Status</th>
+                                <th>Verification Code</th>
+                                <th>Expires</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prescriptionsTable">
+                            <!-- Prescriptions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pharmacies Section -->
+        <div id="pharmacies-section" class="admin-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Pharmacy Management</h5>
+                    <button class="btn btn-primary" onclick="addNewPharmacy()">
+                        <i class="fas fa-plus me-2"></i>Add Pharmacy
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>License</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Verified</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pharmaciesTable">
+                            <!-- Pharmacies will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics-section" class="admin-section hidden">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <h5>Revenue Analytics</h5>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="content-card">
+                        <h5>User Activity</h5>
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="content-card">
+                        <h5>Top Selling Medicines</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine</th>
+                                        <th>Category</th>
+                                        <th>Total Sold</th>
+                                        <th>Revenue</th>
+                                        <th>Avg Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topMedicinesTable">
+                                    <!-- Top medicines will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Section -->
+        <div id="audit-section" class="admin-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Audit Logs</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" id="auditSearch" placeholder="Search logs..." style="width: 200px;">
+                        <button class="btn btn-primary" onclick="exportAuditLogs()">
+                            <i class="fas fa-download me-2"></i>Export Logs
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTable">
+                            <!-- Audit logs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="userName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="userEmail" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="userUsername" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="userPassword" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Account Type *</label>
+                                <select class="form-select" id="userAccountType" required onchange="handleAccountTypeChange()">
+                                    <option value="">Select Account Type</option>
+                                    <option value="pharmacy">Pharmacy Staff</option>
+                                    <option value="doctor">Doctor</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Security Level</label>
+                                <select class="form-select" id="userSecurityLevel">
+                                    <option value="standard">Standard</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" id="pharmacyFields" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pharmacy License *</label>
+                                <input type="text" class="form-control" id="pharmacyLicense">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pharmacy Name *</label>
+                                <input type="text" class="form-control" id="pharmacyName">
+                            </div>
+                        </div>
+                        <div class="row" id="doctorFields" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Doctor License *</label>
+                                <input type="text" class="form-control" id="doctorLicense">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Specialization</label>
+                                <input type="text" class="form-control" id="doctorSpecialization">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="userPhone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="userStatus">
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="userAddress" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pharmacy Management Modal -->
+    <div class="modal fade" id="pharmacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pharmacyModalTitle">Add New Pharmacy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="pharmacyForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pharmacy Name *</label>
+                                <input type="text" class="form-control" id="pharmacyModalName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">License Number *</label>
+                                <input type="text" class="form-control" id="pharmacyModalLicense" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="pharmacyModalEmail" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone *</label>
+                                <input type="tel" class="form-control" id="pharmacyModalPhone" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address *</label>
+                            <textarea class="form-control" id="pharmacyModalAddress" rows="2" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" id="pharmacyModalCity">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">District</label>
+                                <input type="text" class="form-control" id="pharmacyModalDistrict">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Province</label>
+                                <input type="text" class="form-control" id="pharmacyModalProvince">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">GPS Coordinates</label>
+                                <input type="text" class="form-control" id="pharmacyModalGPS" placeholder="Latitude, Longitude">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Operating Hours</label>
+                                <input type="text" class="form-control" id="pharmacyModalHours" placeholder="e.g., 8:00 AM - 8:00 PM">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="pharmacyModalStatus">
+                                    <option value="true">Open</option>
+                                    <option value="false">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Verification Status</label>
+                                <select class="form-select" id="pharmacyModalVerified">
+                                    <option value="true">Verified</option>
+                                    <option value="false">Not Verified</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePharmacy()">Save Pharmacy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Admin functionality
+        let currentUser = null;
+        let app = null;
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and admin role
+            const savedUser = localStorage.getItem('medorder_musanze_current_user_encrypted');
+            if (!savedUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Initialize app if not already done
+            if (!window.app) {
+                app = new MedOrderMusanze();
+            } else {
+                app = window.app;
+            }
+            
+            currentUser = app.currentUser;
+            
+            // Check if user is admin
+            if (currentUser.accountType !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            initializeAdminPanel();
+        });
+
+        function initializeAdminPanel() {
+            loadAdminData();
+            updateStatistics();
+            initializeCharts();
+            startRealTimeMonitoring();
+        }
+
+        function loadAdminData() {
+            loadUsers();
+            loadMedicines();
+            loadOrders();
+            loadPrescriptions();
+            loadPharmacies();
+            loadRecentOrders();
+            loadAuditLogs();
+            loadTopMedicines();
+        }
+
+        function updateStatistics() {
+            document.getElementById('totalUsers').textContent = app.users.length;
+            document.getElementById('totalMedicines').textContent = app.medicines.length;
+            document.getElementById('totalOrders').textContent = app.orders.length;
+            document.getElementById('totalPharmacies').textContent = app.pharmacies.length;
+        }
+
+        function initializeCharts() {
+            // Order Trends Chart
+            const orderCtx = document.getElementById('orderChart');
+            if (orderCtx) {
+                new Chart(orderCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Orders',
+                            data: [12, 19, 15, 25, 22, 30, 28],
+                            borderColor: '#1e3c72',
+                            backgroundColor: 'rgba(30, 60, 114, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Category Chart
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                const categories = {};
+                app.medicines.forEach(med => {
+                    categories[med.category] = (categories[med.category] || 0) + 1;
+                });
+
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(categories),
+                        datasets: [{
+                            data: Object.values(categories),
+                            backgroundColor: [
+                                '#1e3c72',
+                                '#2a5298',
+                                '#28a745',
+                                '#ffc107',
+                                '#dc3545'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx) {
+                new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Revenue (RWF)',
+                            data: [45000, 52000, 48000, 61000, 58000, 67000],
+                            backgroundColor: '#1e3c72'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart');
+            if (activityCtx) {
+                new Chart(activityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                        datasets: [{
+                            label: 'Active Users',
+                            data: [20, 15, 45, 120, 80, 60, 30],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function startRealTimeMonitoring() {
+            // Update statistics every 30 seconds
+            setInterval(() => {
+                updateStatistics();
+                checkSystemHealth();
+            }, 30000);
+        }
+
+        function checkSystemHealth() {
+            // Check for security issues, system performance, etc.
+            const recentFailedLogins = app.auditLogs.filter(log => 
+                log.action === 'LOGIN_FAILED' && 
+                new Date(log.timestamp) > new Date(Date.now() - 300000)
+            );
+
+            if (recentFailedLogins.length > 10) {
+                showSecurityAlert('High number of failed login attempts detected');
+            }
+        }
+
+        function showSecurityAlert(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            alert.style.zIndex = '9999';
+            alert.style.minWidth = '400px';
+            alert.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>Security Alert:</strong> ${message}
+                    </div>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.appendChild(alert);
+        }
+
+        function loadUsers() {
+            const usersTable = document.getElementById('usersTable');
+            if (usersTable) {
+                usersTable.innerHTML = app.users.map(user => `
+                    <tr>
+                        <td><code>${user.id}</code></td>
+                        <td>${user.fullName}</td>
+                        <td>${user.email}</td>
+                        <td><span class="badge ${user.accountType === 'admin' ? 'bg-danger' : 'bg-primary'}">${user.accountType}</span></td>
+                        <td><span class="security-indicator ${user.securityLevel === 'high' ? 'secure' : 'warning'}">${user.securityLevel || 'standard'}</span></td>
+                        <td><span class="badge ${user.isActive ? 'badge-active' : 'badge-inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-1" onclick="editUser(${user.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="toggleUserStatus(${user.id})">
+                                <i class="fas fa-${user.isActive ? 'ban' : 'check'}"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function loadMedicines() {
+            const medicinesTable = document.getElementById('medicinesTable');
+            if (medicinesTable) {
+                medicinesTable.innerHTML = app.medicines.map(medicine => `
+                    <tr>
+                        <td><code>${medicine.id}</code></td>
+                        <td>${medicine.name}</td>
+                        <td><span class="badge bg-info">${medicine.category}</span></td>
+                        <td><strong>RWF ${medicine.price.toLocaleString()}</strong></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span>${medicine.stock}</span>
+                                <div class="availability-indicator ${medicine.availability}">
+                                    ${medicine.availability === 'available' ? '✓' : 
+                                      medicine.availability === 'limited' ? '⚠' : '✗'}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="availability-indicator ${medicine.availability}">
+                                ${medicine.availability === 'available' ? 'In Stock' : 
+                                  medicine.availability === 'limited' ? 'Limited' : 'Out of Stock'}
+                            </div>
+                        </td>
+                        <td>${medicine.requiresPrescription ? 
+                            '<span class="badge bg-warning">Required</span>' : 
+                            '<span class="badge bg-success">Not Required</span>'}</td>
+                        <td>${medicine.manufacturer}</td>
+                        <td>${app.getPharmacyById(medicine.pharmacyId)?.name || 'Unknown Pharmacy'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function loadOrders() {
+            const ordersTable = document.getElementById('ordersTable');
+            if (ordersTable) {
+                ordersTable.innerHTML = app.orders.map(order => {
+                    const user = app.users.find(u => u.id === order.userId);
+                    const statusBadge = getStatusBadge(order.status);
+                    const priorityBadge = getPriorityBadge(order.priority);
+                    return `
+                        <tr>
+                            <td><code>${order.id.substring(0, 8)}</code></td>
+                            <td><code>${order.trackingNumber || 'N/A'}</code></td>
+                            <td>${user ? user.fullName : 'Unknown'}</td>
+                            <td>${order.medicineName}</td>
+                            <td>${order.quantity}</td>
+                            <td><strong>RWF ${order.total.toLocaleString()}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td>${priorityBadge}</td>
+                            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <select class="form-select form-select-sm" onchange="updateOrderStatus('${order.id}', this.value)">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function loadPrescriptions() {
+            const prescriptionsTable = document.getElementById('prescriptionsTable');
+            if (prescriptionsTable) {
+                prescriptionsTable.innerHTML = app.prescriptions.map(prescription => {
+                    const user = app.users.find(u => u.id === prescription.userId);
+                    const statusBadge = getPrescriptionStatusBadge(prescription.status);
+                    return `
+                        <tr>
+                            <td><code>${prescription.id.substring(0, 8)}</code></td>
+                            <td>${user ? user.fullName : 'Unknown'}</td>
+                            <td>${prescription.doctorName}</td>
+                            <td><code>${prescription.doctorLicense || 'N/A'}</code></td>
+                            <td>${new Date(prescription.dateIssued).toLocaleDateString()}</td>
+                            <td>${statusBadge}</td>
+                            <td><code>${prescription.verificationCode}</code></td>
+                            <td>${new Date(prescription.expiresAt).toLocaleDateString()}</td>
+                            <td>
+                                <select class="form-select form-select-sm" onchange="updatePrescriptionStatus('${prescription.id}', this.value)">
+                                    <option value="pending_verification" ${prescription.status === 'pending_verification' ? 'selected' : ''}>Pending Verification</option>
+                                    <option value="verified" ${prescription.status === 'verified' ? 'selected' : ''}>Verified</option>
+                                    <option value="rejected" ${prescription.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function loadPharmacies() {
+            const pharmaciesTable = document.getElementById('pharmaciesTable');
+            if (pharmaciesTable) {
+                pharmaciesTable.innerHTML = app.pharmacies.map(pharmacy => `
+                    <tr>
+                        <td><code>${pharmacy.id}</code></td>
+                        <td>${pharmacy.name}</td>
+                        <td>${pharmacy.address}</td>
+                        <td>${pharmacy.phone}</td>
+                        <td>${pharmacy.email}</td>
+                        <td><code>${pharmacy.licenseNumber}</code></td>
+                        <td>
+                            <i class="fas fa-star text-warning"></i> ${pharmacy.rating}
+                        </td>
+                        <td><span class="badge ${pharmacy.isOpen ? 'badge-active' : 'badge-inactive'}">${pharmacy.isOpen ? 'Open' : 'Closed'}</span></td>
+                        <td>${pharmacy.verified ? 
+                            '<span class="security-indicator secure"><i class="fas fa-check"></i> Verified</span>' : 
+                            '<span class="security-indicator danger"><i class="fas fa-times"></i> Not Verified</span>'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-1" onclick="editPharmacy(${pharmacy.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePharmacy(${pharmacy.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function loadRecentOrders() {
+            const recentOrdersTable = document.getElementById('recentOrdersTable');
+            if (recentOrdersTable) {
+                const recentOrders = app.orders.slice(-10).reverse();
+                if (recentOrders.length === 0) {
+                    recentOrdersTable.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No recent orders</td></tr>';
+                } else {
+                    recentOrdersTable.innerHTML = recentOrders.map(order => {
+                        const user = app.users.find(u => u.id === order.userId);
+                        const statusBadge = getStatusBadge(order.status);
+                        return `
+                            <tr>
+                                <td><code>${order.id.substring(0, 8)}</code></td>
+                                <td>${user ? user.fullName : 'Unknown'}</td>
+                                <td>${order.medicineName}</td>
+                                <td><strong>RWF ${order.total.toLocaleString()}</strong></td>
+                                <td>${statusBadge}</td>
+                                <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="viewOrderDetails('${order.id}')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        function loadAuditLogs() {
+            const auditTable = document.getElementById('auditTable');
+            if (auditTable) {
+                const recentLogs = app.auditLogs.slice(-50).reverse();
+                if (recentLogs.length === 0) {
+                    auditTable.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No audit logs</td></tr>';
+                } else {
+                    auditTable.innerHTML = recentLogs.map(log => `
+                        <tr>
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td>${log.userId}</td>
+                            <td><span class="badge bg-info">${log.action}</span></td>
+                            <td>${log.details}</td>
+                            <td><code>${log.ipAddress}</code></td>
+                            <td><small>${log.userAgent.substring(0, 50)}...</small></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        }
+
+        function loadTopMedicines() {
+            const topMedicinesTable = document.getElementById('topMedicinesTable');
+            if (topMedicinesTable) {
+                // Calculate top selling medicines
+                const medicineSales = {};
+                app.orders.forEach(order => {
+                    if (!medicineSales[order.medicineName]) {
+                        medicineSales[order.medicineName] = {
+                            category: app.medicines.find(m => m.name === order.medicineName)?.category || 'Unknown',
+                            quantity: 0,
+                            revenue: 0,
+                            rating: 0
+                        };
+                    }
+                    medicineSales[order.medicineName].quantity += order.quantity;
+                    medicineSales[order.medicineName].revenue += order.total;
+                });
+
+                // Add ratings
+                app.medicines.forEach(medicine => {
+                    if (medicineSales[medicine.name]) {
+                        medicineSales[medicine.name].rating = medicine.rating;
+                    }
+                });
+
+                const topMedicines = Object.entries(medicineSales)
+                    .sort((a, b) => b[1].revenue - a[1].revenue)
+                    .slice(0, 10);
+
+                topMedicinesTable.innerHTML = topMedicines.map(([name, data]) => `
+                    <tr>
+                        <td>${name}</td>
+                        <td><span class="badge bg-info">${data.category}</span></td>
+                        <td>${data.quantity}</td>
+                        <td><strong>RWF ${data.revenue.toLocaleString()}</strong></td>
+                        <td>
+                            <i class="fas fa-star text-warning"></i> ${data.rating.toFixed(1)}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge badge-pending">Pending</span>',
+                'confirmed': '<span class="badge badge-confirmed">Confirmed</span>',
+                'processing': '<span class="badge badge-processing">Processing</span>',
+                'shipped': '<span class="badge badge-shipped">Shipped</span>',
+                'delivered': '<span class="badge badge-delivered">Delivered</span>',
+                'cancelled': '<span class="badge badge-cancelled">Cancelled</span>'
+            };
+            return badges[status] || badges['pending'];
+        }
+
+        function getPrescriptionStatusBadge(status) {
+            const badges = {
+                'pending_verification': '<span class="badge badge-pending">Pending Verification</span>',
+                'verified': '<span class="badge badge-delivered">Verified</span>',
+                'rejected': '<span class="badge badge-cancelled">Rejected</span>',
+                'expired': '<span class="badge badge-shipped">Expired</span>'
+            };
+            return badges[status] || badges['pending_verification'];
+        }
+
+        function getPriorityBadge(priority) {
+            const badges = {
+                'high': '<span class="badge bg-danger">High</span>',
+                'medium': '<span class="badge bg-warning">Medium</span>',
+                'low': '<span class="badge bg-success">Low</span>'
+            };
+            return badges[priority] || badges['low'];
+        }
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show selected section
+            const selectedSection = document.getElementById(`${section}-section`);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+
+            // Update active menu
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function updateOrderStatus(orderId, status) {
+            app.updateOrderStatus(orderId, status);
+            loadOrders();
+            loadRecentOrders();
+            updateStatistics();
+        }
+
+        function updatePrescriptionStatus(prescriptionId, status) {
+            const prescription = app.prescriptions.find(p => p.id === prescriptionId);
+            if (prescription) {
+                prescription.status = status;
+                prescription.verifiedBy = currentUser.id;
+                prescription.verificationDate = new Date().toISOString();
+                app.savePrescriptions();
+                loadPrescriptions();
+            }
+        }
+
+        function viewOrderDetails(orderId) {
+            const order = app.orders.find(o => o.id === orderId);
+            if (order) {
+                const user = app.users.find(u => u.id === order.userId);
+                alert(`Order Details:\n\nOrder ID: ${orderId.substring(0, 8)}\nTracking: ${order.trackingNumber || 'N/A'}\nCustomer: ${user ? user.fullName : 'Unknown'}\nMedicine: ${order.medicineName}\nQuantity: ${order.quantity}\nTotal: RWF ${order.total.toLocaleString()}\nStatus: ${order.status}\nPriority: ${order.priority}\nDate: ${new Date(order.createdAt).toLocaleString()}`);
+            }
+        }
+
+        function exportData() {
+            const data = {
+                users: app.users,
+                medicines: app.medicines,
+                orders: app.orders,
+                pharmacies: app.pharmacies,
+                prescriptions: app.prescriptions,
+                auditLogs: app.auditLogs,
+                exportedAt: new Date().toISOString(),
+                exportedBy: currentUser.fullName
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `medorder_musanze_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            app.showNotification('Data exported successfully', 'success');
+        }
+
+        function exportAuditLogs() {
+            const auditData = {
+                auditLogs: app.auditLogs,
+                exportedAt: new Date().toISOString(),
+                exportedBy: currentUser.fullName
+            };
+            
+            const dataStr = JSON.stringify(auditData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            app.showNotification('Audit logs exported successfully', 'success');
+        }
+
+        function refreshData() {
+            loadAdminData();
+            updateStatistics();
+            app.showNotification('Data refreshed successfully', 'success');
+        }
+
+        // Placeholder functions for admin actions
+        function addNewUser() {
+            showUserModal();
+        }
+
+        function editUser(userId) {
+            showUserModal(userId);
+        }
+
+        function showUserModal(userId = null) {
+            const modal = new bootstrap.Modal(document.getElementById('userModal'));
+            const form = document.getElementById('userForm');
+            const title = document.getElementById('userModalTitle');
+            
+            // Reset form
+            form.reset();
+            document.getElementById('pharmacyFields').style.display = 'none';
+            document.getElementById('doctorFields').style.display = 'none';
+            
+            if (userId) {
+                // Edit mode - load existing user
+                const user = app.users.find(u => u.id === userId);
+                if (user) {
+                    title.textContent = 'Edit User';
+                    document.getElementById('userName').value = user.fullName;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userUsername').value = user.username;
+                    document.getElementById('userAccountType').value = user.accountType;
+                    document.getElementById('userSecurityLevel').value = user.securityLevel || 'standard';
+                    document.getElementById('userPhone').value = user.phone || '';
+                    document.getElementById('userStatus').value = user.isActive ? 'true' : 'false';
+                    document.getElementById('userAddress').value = user.address || '';
+                    
+                    // Handle account type specific fields
+                    handleAccountTypeChange();
+                    if (user.accountType === 'pharmacy') {
+                        document.getElementById('pharmacyLicense').value = user.licenseNumber || '';
+                        document.getElementById('pharmacyName').value = user.pharmacyName || '';
+                    } else if (user.accountType === 'doctor') {
+                        document.getElementById('doctorLicense').value = user.licenseNumber || '';
+                        document.getElementById('doctorSpecialization').value = user.specialization || '';
+                    }
+                    
+                    // Store edit mode
+                    window.editingUserId = userId;
+                }
+            } else {
+                // Add mode
+                title.textContent = 'Add New User';
+                window.editingUserId = null;
+            }
+            
+            modal.show();
+        }
+
+        function handleAccountTypeChange() {
+            const accountType = document.getElementById('userAccountType').value;
+            const pharmacyFields = document.getElementById('pharmacyFields');
+            const doctorFields = document.getElementById('doctorFields');
+            
+            pharmacyFields.style.display = accountType === 'pharmacy' ? 'block' : 'none';
+            doctorFields.style.display = accountType === 'doctor' ? 'block' : 'none';
+        }
+
+        function saveUser() {
+            const form = document.getElementById('userForm');
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Get form values
+            const userData = {
+                fullName: document.getElementById('userName').value.trim(),
+                email: document.getElementById('userEmail').value.trim(),
+                username: document.getElementById('userUsername').value.trim(),
+                accountType: document.getElementById('userAccountType').value,
+                securityLevel: document.getElementById('userSecurityLevel').value,
+                phone: document.getElementById('userPhone').value.trim(),
+                isActive: document.getElementById('userStatus').value === 'true',
+                address: document.getElementById('userAddress').value.trim()
+            };
+            
+            // Add account type specific fields
+            if (userData.accountType === 'pharmacy') {
+                userData.licenseNumber = document.getElementById('pharmacyLicense').value.trim();
+                userData.pharmacyName = document.getElementById('pharmacyName').value.trim();
+            } else if (userData.accountType === 'doctor') {
+                userData.licenseNumber = document.getElementById('doctorLicense').value.trim();
+                userData.specialization = document.getElementById('doctorSpecialization').value.trim();
+            }
+            
+            // Check for duplicate username/email (only for new users)
+            if (!window.editingUserId) {
+                const existingUser = app.users.find(u => u.username === userData.username || u.email === userData.email);
+                if (existingUser) {
+                    app.showNotification('Username or email already exists', 'error');
+                    return;
+                }
+            }
+            
+            if (window.editingUserId) {
+                // Update existing user
+                const user = app.users.find(u => u.id === window.editingUserId);
+                if (user) {
+                    Object.assign(user, userData);
+                    app.logAuditEvent('USER_UPDATED', `User ${user.username} updated`);
+                    app.showNotification('User updated successfully', 'success');
+                }
+            } else {
+                // Add new user
+                const newUser = {
+                    id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    ...userData,
+                    password: app.hashPassword(document.getElementById('userPassword').value),
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser.id,
+                    lastLogin: null
+                };
+                
+                app.users.push(newUser);
+                app.logAuditEvent('USER_ADDED', `New user ${newUser.username} added`);
+                app.showNotification('User added successfully', 'success');
+            }
+            
+            // Save and refresh
+            app.saveUsers();
+            loadUsers();
+            updateStatistics();
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
+            modal.hide();
+            
+            // Clear edit mode
+            window.editingUserId = null;
+        }
+
+        function toggleUserStatus(userId) {
+            const user = app.users.find(u => u.id === userId);
+            if (user && confirm(`Are you sure you want to ${user.isActive ? 'deactivate' : 'activate'} this user?`)) {
+                user.isActive = !user.isActive;
+                app.saveUsers();
+                loadUsers();
+                app.logAuditEvent('USER_STATUS_CHANGED', `User ${userId} status changed to ${user.isActive ? 'active' : 'inactive'}`);
+            }
+        }
+
+        function addNewPharmacy() {
+            showPharmacyModal();
+        }
+
+        function editPharmacy(pharmacyId) {
+            showPharmacyModal(pharmacyId);
+        }
+
+        function showPharmacyModal(pharmacyId = null) {
+            const modal = new bootstrap.Modal(document.getElementById('pharmacyModal'));
+            const form = document.getElementById('pharmacyForm');
+            const title = document.getElementById('pharmacyModalTitle');
+            
+            // Reset form
+            form.reset();
+            
+            if (pharmacyId) {
+                // Edit mode - load existing pharmacy
+                const pharmacy = app.pharmacies.find(p => p.id === pharmacyId);
+                if (pharmacy) {
+                    title.textContent = 'Edit Pharmacy';
+                    document.getElementById('pharmacyModalName').value = pharmacy.name;
+                    document.getElementById('pharmacyModalLicense').value = pharmacy.licenseNumber;
+                    document.getElementById('pharmacyModalEmail').value = pharmacy.email;
+                    document.getElementById('pharmacyModalPhone').value = pharmacy.phone;
+                    document.getElementById('pharmacyModalAddress').value = pharmacy.address;
+                    document.getElementById('pharmacyModalCity').value = pharmacy.city || '';
+                    document.getElementById('pharmacyModalDistrict').value = pharmacy.district || '';
+                    document.getElementById('pharmacyModalProvince').value = pharmacy.province || '';
+                    document.getElementById('pharmacyModalGPS').value = pharmacy.gps || '';
+                    document.getElementById('pharmacyModalHours').value = pharmacy.operatingHours || '';
+                    document.getElementById('pharmacyModalStatus').value = pharmacy.isOpen ? 'true' : 'false';
+                    document.getElementById('pharmacyModalVerified').value = pharmacy.verified ? 'true' : 'false';
+                    
+                    // Store edit mode
+                    window.editingPharmacyId = pharmacyId;
+                }
+            } else {
+                // Add mode
+                title.textContent = 'Add New Pharmacy';
+                window.editingPharmacyId = null;
+            }
+            
+            modal.show();
+        }
+
+        function savePharmacy() {
+            const form = document.getElementById('pharmacyForm');
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Get form values
+            const pharmacyData = {
+                name: document.getElementById('pharmacyModalName').value.trim(),
+                licenseNumber: document.getElementById('pharmacyModalLicense').value.trim(),
+                email: document.getElementById('pharmacyModalEmail').value.trim(),
+                phone: document.getElementById('pharmacyModalPhone').value.trim(),
+                address: document.getElementById('pharmacyModalAddress').value.trim(),
+                city: document.getElementById('pharmacyModalCity').value.trim(),
+                district: document.getElementById('pharmacyModalDistrict').value.trim(),
+                province: document.getElementById('pharmacyModalProvince').value.trim(),
+                gps: document.getElementById('pharmacyModalGPS').value.trim(),
+                operatingHours: document.getElementById('pharmacyModalHours').value.trim(),
+                isOpen: document.getElementById('pharmacyModalStatus').value === 'true',
+                verified: document.getElementById('pharmacyModalVerified').value === 'true',
+                rating: 0,
+                reviews: []
+            };
+            
+            // Check for duplicate license/email (only for new pharmacies)
+            if (!window.editingPharmacyId) {
+                const existingPharmacy = app.pharmacies.find(p => p.licenseNumber === pharmacyData.licenseNumber || p.email === pharmacyData.email);
+                if (existingPharmacy) {
+                    app.showNotification('License number or email already exists', 'error');
+                    return;
+                }
+            }
+            
+            if (window.editingPharmacyId) {
+                // Update existing pharmacy
+                const pharmacy = app.pharmacies.find(p => p.id === window.editingPharmacyId);
+                if (pharmacy) {
+                    Object.assign(pharmacy, pharmacyData);
+                    app.logAuditEvent('PHARMACY_UPDATED', `Pharmacy ${pharmacy.name} updated`);
+                    app.showNotification('Pharmacy updated successfully', 'success');
+                }
+            } else {
+                // Add new pharmacy
+                const newPharmacy = {
+                    id: 'pharmacy_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    ...pharmacyData,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser.id
+                };
+                
+                app.pharmacies.push(newPharmacy);
+                app.logAuditEvent('PHARMACY_ADDED', `New pharmacy ${newPharmacy.name} added`);
+                app.showNotification('Pharmacy added successfully', 'success');
+            }
+            
+            // Save and refresh
+            app.savePharmacies();
+            loadPharmacies();
+            updateStatistics();
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('pharmacyModal'));
+            modal.hide();
+            
+            // Clear edit mode
+            window.editingPharmacyId = null;
+        }
+
+        function deletePharmacy(pharmacyId) {
+            if (confirm('Are you sure you want to delete this pharmacy?')) {
+                const index = app.pharmacies.findIndex(p => p.id === pharmacyId);
+                if (index > -1) {
+                    const pharmacy = app.pharmacies[index];
+                    app.pharmacies.splice(index, 1);
+                    app.savePharmacies();
+                    loadPharmacies();
+                    app.logAuditEvent('PHARMACY_DELETED', `Pharmacy ${pharmacy.name} deleted`);
+                    app.showNotification('Pharmacy deleted successfully', 'success');
+                    updateStatistics();
+                }
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                app.logout();
+            }
+        }
+
+        </script>
+</body>
+</html>
