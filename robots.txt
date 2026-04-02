@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://medordermusanze.github.io/sitemap.xml
+
+# Allow crawling of all important pages
+Allow: /index.html
+Allow: /dashboard.html
+Allow: /admin.html
+Allow: /pharmacy-dashboard.html
+Allow: /js/
+Allow: /css/
+
+# Block crawling of sensitive files
+Disallow: /private/
+Disallow: /*.json
+Disallow: /*?*
+Disallow: /temp/
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1

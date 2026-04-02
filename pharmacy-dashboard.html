@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Dashboard - MedOrder Musanze</title>
+    
+    <!-- Bootstrap 5.3.0 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6.4.0 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS for GPS Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #333;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #28a745;
+            color: #1e3c72;
+        }
+
+        .pharmacy-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .user-profile {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            color: #333;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: #1e3c72;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .table {
+            color: #333;
+        }
+
+        .table th {
+            border-bottom: 2px solid #28a745;
+            font-weight: 600;
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .table td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #555;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .badge-confirmed {
+            background: rgba(23, 162, 184, 0.2);
+            color: #17a2b8;
+        }
+
+        .badge-processing {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .badge-shipped {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+        }
+
+        .badge-delivered {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .badge-approved {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-denied {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .badge-payment-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .badge-paid {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-verified {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .badge-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .stock-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .in-stock {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .low-stock {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .out-of-stock {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .real-time-indicator.pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-pills me-2"></i>Pharmacy Dashboard
+        </div>
+
+        <div class="pharmacy-badge">
+            <i class="fas fa-store me-2"></i>Pharmacy Staff
+        </div>
+
+        <div class="user-profile">
+            <img src="https://picsum.photos/seed/pharmacy/200/200" alt="User Avatar" class="user-avatar" id="userAvatar">
+            <div id="userName">Pharmacy Staff</div>
+            <div id="pharmacyName">Musanze Central Pharmacy</div>
+            <div class="real-time-indicator pulse">
+                <i class="fas fa-circle"></i> Online
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active" onclick="showSection('overview')">
+                    <i class="fas fa-home"></i>Overview
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-cart"></i>Order Management
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('medicines')">
+                    <i class="fas fa-pills"></i>Medicine Inventory
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('prescriptions')">
+                    <i class="fas fa-file-medical"></i>Prescription Verification
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('notifications')">
+                    <i class="fas fa-bell"></i>Notifications
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i>Profile
+                </a>
+            </li>
+            <li class="mt-4">
+                <a href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>Pharmacy Management Dashboard</h1>
+                    <p>Manage your pharmacy inventory, orders, and prescriptions</p>
+                </div>
+                <div class="real-time-indicator pulse">
+                    <i class="fas fa-circle"></i> System Active
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview-section" class="dashboard-section">
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div>Total Orders</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingOrders">0</div>
+                        <div>Pending Orders</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMedicines">0</div>
+                        <div>Medicines in Stock</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-number" id="prescriptionPending">0</div>
+                        <div>Pending Prescriptions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="content-card">
+                <h5>Recent Orders</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Medicine</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No recent orders</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders-section" class="dashboard-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Order Management</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" id="orderSearch" placeholder="Search orders..." style="width: 200px;">
+                        <select class="form-select" id="orderStatusFilter" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Medicine</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medicines Section -->
+        <div id="medicines-section" class="dashboard-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Medicine Inventory Management</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" id="medicineSearch" placeholder="Search medicines..." style="width: 200px;">
+                        <button class="btn btn-success" onclick="showAddMedicineModal()">
+                            <i class="fas fa-plus me-2"></i>Add Medicine
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Prescription</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicinesTable">
+                            <!-- Medicines will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Section -->
+        <div id="prescriptions-section" class="dashboard-section hidden">
+            <div class="content-card">
+                <h5>Prescription Verification</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Doctor License</th>
+                                <th>Date Issued</th>
+                                <th>Medicines</th>
+                                <th>Status</th>
+                                <th>Verification Code</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prescriptionsTable">
+                            <!-- Prescriptions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" class="dashboard-section hidden">
+            <div class="content-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5>Notifications</h5>
+                    <button class="btn btn-success btn-sm" onclick="markAllNotificationsRead()">
+                        Mark All Read
+                    </button>
+                </div>
+                <div id="notificationsList">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile-section" class="dashboard-section hidden">
+            <div class="content-card">
+                <h5>Pharmacy Profile</h5>
+                <div id="profileContent">
+                    <!-- Profile will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Medicine Modal -->
+    <div class="modal fade" id="addMedicineModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Add New Medicine
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMedicineForm">
+                        <div class="mb-3">
+                            <label class="form-label">Medicine Name *</label>
+                            <input type="text" class="form-control" id="medicineName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Generic Name</label>
+                            <input type="text" class="form-control" id="genericName">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category *</label>
+                                <select class="form-control" id="medicineCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Pain Relief">Pain Relief</option>
+                                    <option value="Antibiotics">Antibiotics</option>
+                                    <option value="Cardiovascular">Cardiovascular</option>
+                                    <option value="Diabetes">Diabetes</option>
+                                    <option value="Vitamins">Vitamins</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price (RWF) *</label>
+                                <input type="number" class="form-control" id="medicinePrice" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock Quantity *</label>
+                                <input type="number" class="form-control" id="medicineStock" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Requires Prescription</label>
+                                <select class="form-control" id="requiresPrescription">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="medicineDescription" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-plus me-2"></i>Add Medicine
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Medicine Modal -->
+    <div class="modal fade" id="editMedicineModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Edit Medicine
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMedicineForm">
+                        <input type="hidden" id="editMedicineId">
+                        <div class="mb-3">
+                            <label class="form-label">Medicine Name *</label>
+                            <input type="text" class="form-control" id="editMedicineName" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price (RWF) *</label>
+                                <input type="number" class="form-control" id="editMedicinePrice" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock Quantity *</label>
+                                <input type="number" class="form-control" id="editMedicineStock" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-2"></i>Update Medicine
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Pharmacy Dashboard functionality
+        let currentUser = null;
+        let app = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            const savedUser = localStorage.getItem('medorder_musanze_current_user_encrypted');
+            if (!savedUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Initialize app if not already done
+            if (!window.app) {
+                app = new MedOrderApp();
+            } else {
+                app = window.app;
+            }
+            
+            currentUser = app.currentUser;
+            
+            // Check if user is pharmacy staff
+            if (currentUser.accountType !== 'pharmacy') {
+                alert('Access denied. Pharmacy staff privileges required.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            initializePharmacyDashboard();
+        });
+
+        function initializePharmacyDashboard() {
+            loadUserData();
+            loadPharmacyData();
+            startRealTimeUpdates();
+        }
+
+        function loadUserData() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.fullName;
+                document.getElementById('userAvatar').src = 'https://picsum.photos/seed/' + currentUser.username + '/200/200';
+            }
+        }
+
+        function loadPharmacyData() {
+            loadOrders();
+            loadMedicines();
+            loadPrescriptions();
+            loadNotifications();
+            updateStatistics();
+        }
+
+        function updateStatistics() {
+            const allOrders = app.orders;
+            const pendingOrders = allOrders.filter(o => o.status === 'pending');
+            const totalMedicines = app.medicines.length;
+            const pendingPrescriptions = app.prescriptions.filter(p => p.status === 'pending_verification');
+
+            document.getElementById('totalOrders').textContent = allOrders.length;
+            document.getElementById('pendingOrders').textContent = pendingOrders.length;
+            document.getElementById('totalMedicines').textContent = totalMedicines;
+            document.getElementById('prescriptionPending').textContent = pendingPrescriptions.length;
+
+            // Load recent orders
+            loadRecentOrders();
+        }
+
+        function loadOrders() {
+            const ordersTable = document.getElementById('ordersTable');
+            if (ordersTable) {
+                ordersTable.innerHTML = app.orders.map(order => {
+                    const user = app.users.find(u => u.id === order.userId);
+                    const statusBadge = getStatusBadge(order.status);
+                    const paymentBadge = getPaymentBadge(order.paymentStatus);
+                    return `
+                        <tr>
+                            <td><code>${order.id.substring(0, 8)}</code></td>
+                            <td>${user ? user.fullName : 'Unknown'}</td>
+                            <td>${user ? user.phone : 'N/A'}</td>
+                            <td>${order.medicineName}</td>
+                            <td>${order.quantity}</td>
+                            <td><strong>RWF ${order.total.toLocaleString()}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td>${paymentBadge}</td>
+                            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    ${order.status === 'pending' ? `
+                                        <button class="btn btn-sm btn-success" onclick="approveOrder('${order.id}')">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="denyOrder('${order.id}')">
+                                            <i class="fas fa-times"></i> Deny
+                                        </button>
+                                    ` : ''}
+                                    ${order.status === 'confirmed' ? `
+                                        <button class="btn btn-sm btn-primary" onclick="updateOrderStatus('${order.id}', 'processing')">
+                                            <i class="fas fa-cog"></i> Process
+                                        </button>
+                                    ` : ''}
+                                    ${order.status === 'processing' ? `
+                                        <button class="btn btn-sm btn-info" onclick="updateOrderStatus('${order.id}', 'shipped')">
+                                            <i class="fas fa-truck"></i> Ship
+                                        </button>
+                                    ` : ''}
+                                    ${order.status === 'shipped' ? `
+                                        <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${order.id}', 'delivered')">
+                                            <i class="fas fa-check-circle"></i> Deliver
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function loadMedicines() {
+            const medicinesTable = document.getElementById('medicinesTable');
+            if (medicinesTable) {
+                medicinesTable.innerHTML = app.medicines.map(medicine => {
+                    const stockStatus = getStockStatus(medicine.stock);
+                    return `
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>${medicine.name}</strong>
+                                    ${medicine.genericName ? `<br><small class="text-muted">${medicine.genericName}</small>` : ''}
+                                </div>
+                            </td>
+                            <td><span class="badge bg-secondary">${medicine.category}</span></td>
+                            <td><strong>RWF ${medicine.price.toLocaleString()}</strong></td>
+                            <td>
+                                <div class="stock-indicator ${stockStatus.class}">
+                                    <i class="fas ${stockStatus.icon}"></i>
+                                    ${medicine.stock} units
+                                </div>
+                            </td>
+                            <td><span class="badge ${stockStatus.class}">${stockStatus.text}</span></td>
+                            <td>
+                                ${medicine.requiresPrescription ? 
+                                    '<span class="badge badge-warning">Required</span>' : 
+                                    '<span class="badge badge-success">Not Required</span>'
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editMedicine('${medicine.id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMedicine('${medicine.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function loadPrescriptions() {
+            const prescriptionsTable = document.getElementById('prescriptionsTable');
+            if (prescriptionsTable) {
+                prescriptionsTable.innerHTML = app.prescriptions.map(prescription => {
+                    const patient = app.users.find(u => u.id === prescription.patientId);
+                    return `
+                        <tr>
+                            <td><code>${prescription.id.substring(0, 8)}</code></td>
+                            <td>${patient ? patient.fullName : 'Unknown'}</td>
+                            <td>${prescription.doctorName}</td>
+                            <td>${prescription.doctorLicense}</td>
+                            <td>${new Date(prescription.dateIssued).toLocaleDateString()}</td>
+                            <td>${prescription.medicinesPrescribed}</td>
+                            <td>
+                                <span class="badge ${prescription.status === 'verified' ? 'badge-verified' : 
+                                             prescription.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">
+                                    ${prescription.status.charAt(0).toUpperCase() + prescription.status.slice(1)}
+                                </span>
+                            </td>
+                            <td><code>${prescription.verificationCode}</code></td>
+                            <td>
+                                ${prescription.status === 'pending_verification' ? `
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-success" onclick="verifyPrescription('${prescription.id}')">
+                                            <i class="fas fa-check"></i> Verify
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="rejectPrescription('${prescription.id}')">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function loadNotifications() {
+            const notificationsList = document.getElementById('notificationsList');
+            if (notificationsList) {
+                const notifications = app.notifications.filter(n => n.userId === currentUser.id);
+                notificationsList.innerHTML = notifications.map(notification => `
+                    <div class="alert alert-${notification.type} alert-dismissible fade show" role="alert">
+                        <strong>${notification.title}</strong><br>
+                        ${notification.message}
+                        <small class="text-muted d-block">${new Date(notification.timestamp).toLocaleString()}</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadRecentOrders() {
+            const recentOrdersTable = document.getElementById('recentOrdersTable');
+            if (recentOrdersTable) {
+                const recentOrders = app.orders.slice(-5).reverse();
+                recentOrdersTable.innerHTML = recentOrders.map(order => {
+                    const user = app.users.find(u => u.id === order.userId);
+                    const statusBadge = getStatusBadge(order.status);
+                    return `
+                        <tr>
+                            <td><code>${order.id.substring(0, 8)}</code></td>
+                            <td>${user ? user.fullName : 'Unknown'}</td>
+                            <td>${order.medicineName}</td>
+                            <td>${order.quantity}</td>
+                            <td><strong>RWF ${order.total.toLocaleString()}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                ${order.status === 'pending' ? `
+                                    <button class="btn btn-sm btn-success" onclick="approveOrder('${order.id}')">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': 'badge-pending',
+                'confirmed': 'badge-confirmed',
+                'processing': 'badge-processing',
+                'shipped': 'badge-shipped',
+                'delivered': 'badge-delivered',
+                'cancelled': 'badge-cancelled',
+                'approved': 'badge-approved',
+                'denied': 'badge-denied'
+            };
+            return `<span class="badge ${badges[status] || 'badge-secondary'}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        }
+
+        function getPaymentBadge(paymentStatus) {
+            const badges = {
+                'pending': 'badge-payment-pending',
+                'paid': 'badge-paid',
+                'failed': 'badge-cancelled'
+            };
+            return `<span class="badge ${badges[paymentStatus] || 'badge-secondary'}">${paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}</span>`;
+        }
+
+        function getStockStatus(stock) {
+            if (stock === 0) {
+                return { class: 'out-of-stock', text: 'Out of Stock', icon: 'fas fa-times-circle' };
+            } else if (stock < 10) {
+                return { class: 'low-stock', text: 'Low Stock', icon: 'fas fa-exclamation-triangle' };
+            } else {
+                return { class: 'in-stock', text: 'In Stock', icon: 'fas fa-check-circle' };
+            }
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update menu
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function showAddMedicineModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addMedicineModal'));
+            modal.show();
+        }
+
+        function editMedicine(medicineId) {
+            const medicine = app.medicines.find(m => m.id === medicineId);
+            if (medicine) {
+                document.getElementById('editMedicineId').value = medicine.id;
+                document.getElementById('editMedicineName').value = medicine.name;
+                document.getElementById('editMedicinePrice').value = medicine.price;
+                document.getElementById('editMedicineStock').value = medicine.stock;
+                
+                const modal = new bootstrap.Modal(document.getElementById('editMedicineModal'));
+                modal.show();
+            }
+        }
+
+        function deleteMedicine(medicineId) {
+            if (confirm('Are you sure you want to delete this medicine?')) {
+                const index = app.medicines.findIndex(m => m.id === medicineId);
+                if (index > -1) {
+                    app.medicines.splice(index, 1);
+                    app.saveMedicines();
+                    loadMedicines();
+                    updateStatistics();
+                    app.showNotification('Medicine deleted successfully', 'success');
+                }
+            }
+        }
+
+        function approveOrder(orderId) {
+            const order = app.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'approved';
+                order.approvedBy = currentUser.id;
+                order.approvedAt = new Date().toISOString();
+                order.paymentStatus = 'pending';
+                
+                app.saveOrders();
+                loadOrders();
+                updateStatistics();
+                
+                // Send notification to patient
+                app.addNotification(order.userId, 'Order Approved', `Your order #${orderId.substring(0, 8)} has been approved. Please proceed with payment.`, 'success');
+                
+                app.showNotification('Order approved successfully', 'success');
+            }
+        }
+
+        function denyOrder(orderId) {
+            const reason = prompt('Please provide a reason for denying this order:');
+            if (reason) {
+                const order = app.orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'denied';
+                    order.deniedBy = currentUser.id;
+                    order.deniedAt = new Date().toISOString();
+                    order.denialReason = reason;
+                    
+                    app.saveOrders();
+                    loadOrders();
+                    updateStatistics();
+                    
+                    // Send notification to patient
+                    app.addNotification(order.userId, 'Order Denied', `Your order #${orderId.substring(0, 8)} has been denied. Reason: ${reason}`, 'error');
+                    
+                    app.showNotification('Order denied', 'warning');
+                }
+            }
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const order = app.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                app.saveOrders();
+                loadOrders();
+                updateStatistics();
+                app.showNotification(`Order status updated to ${newStatus}`, 'success');
+            }
+        }
+
+        function verifyPrescription(prescriptionId) {
+            const prescription = app.prescriptions.find(p => p.id === prescriptionId);
+            if (prescription) {
+                prescription.status = 'verified';
+                prescription.verifiedBy = currentUser.id;
+                prescription.verifiedAt = new Date().toISOString();
+                
+                app.savePrescriptions();
+                loadPrescriptions();
+                app.showNotification('Prescription verified successfully', 'success');
+            }
+        }
+
+        function rejectPrescription(prescriptionId) {
+            const reason = prompt('Please provide a reason for rejecting this prescription:');
+            if (reason) {
+                const prescription = app.prescriptions.find(p => p.id === prescriptionId);
+                if (prescription) {
+                    prescription.status = 'rejected';
+                    prescription.rejectedBy = currentUser.id;
+                    prescription.rejectedAt = new Date().toISOString();
+                    prescription.rejectionReason = reason;
+                    
+                    app.savePrescriptions();
+                    loadPrescriptions();
+                    app.showNotification('Prescription rejected', 'warning');
+                }
+            }
+        }
+
+        function markAllNotificationsRead() {
+            // Mark all notifications as read
+            app.notifications = app.notifications.map(n => {
+                if (n.userId === currentUser.id) {
+                    n.read = true;
+                }
+                return n;
+            });
+            app.saveNotifications();
+            loadNotifications();
+            app.showNotification('All notifications marked as read', 'success');
+        }
+
+        function startRealTimeUpdates() {
+            // Update data every 30 seconds
+            setInterval(() => {
+                loadPharmacyData();
+            }, 30000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                app.logout();
+            }
+        }
+
+        // Setup form handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add Medicine Form
+            const addMedicineForm = document.getElementById('addMedicineForm');
+            if (addMedicineForm) {
+                addMedicineForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const newMedicine = {
+                        id: app.generateId(),
+                        name: document.getElementById('medicineName').value,
+                        genericName: document.getElementById('genericName').value,
+                        category: document.getElementById('medicineCategory').value,
+                        price: parseFloat(document.getElementById('medicinePrice').value),
+                        stock: parseInt(document.getElementById('medicineStock').value),
+                        requiresPrescription: document.getElementById('requiresPrescription').value === 'true',
+                        description: document.getElementById('medicineDescription').value,
+                        availability: 'available'
+                    };
+                    
+                    app.medicines.push(newMedicine);
+                    app.saveMedicines();
+                    loadMedicines();
+                    updateStatistics();
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addMedicineModal'));
+                    modal.hide();
+                    
+                    // Reset form
+                    addMedicineForm.reset();
+                    
+                    app.showNotification('Medicine added successfully!', 'success');
+                });
+            }
+
+            // Edit Medicine Form
+            const editMedicineForm = document.getElementById('editMedicineForm');
+            if (editMedicineForm) {
+                editMedicineForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const medicineId = document.getElementById('editMedicineId').value;
+                    const medicine = app.medicines.find(m => m.id === parseInt(medicineId));
+                    
+                    if (medicine) {
+                        medicine.name = document.getElementById('editMedicineName').value;
+                        medicine.price = parseFloat(document.getElementById('editMedicinePrice').value);
+                        medicine.stock = parseInt(document.getElementById('editMedicineStock').value);
+                        
+                        // Update availability based on stock
+                        medicine.availability = medicine.stock > 0 ? 'available' : 'unavailable';
+                        
+                        app.saveMedicines();
+                        loadMedicines();
+                        updateStatistics();
+                        
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editMedicineModal'));
+                        modal.hide();
+                        
+                        app.showNotification(`Medicine "${medicine.name}" updated successfully!`, 'success');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
